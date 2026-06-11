@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC426</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: #fff; font-family: Georgia, serif; color: #222; }
+  header { border-bottom: 3px double #000; padding: 18px 20px 14px; }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #555; font-style: italic; }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 30px 20px; }
+  section { margin-bottom: 50px; }
+  section h2 { font-size: 16px; border-left: 4px solid #000; padding-left: 10px; margin-bottom: 20px; }
+  .sc { border: 1px solid #aaa; padding: 12px 14px; font-size: 26px; text-align: right; min-height: 55px; margin-bottom: 10px; background: #fcfcfc; word-break: break-all; }
+  .keys { display: grid; grid-template-columns: repeat(4, 60px); gap: 8px; }
+  .key { width: 60px; height: 48px; font-size: 16px; font-family: Georgia, serif; border: 1px solid #aaa; background: #fff; cursor: pointer; }
+  .key:hover { background: #f0f0f0; }
+  .key.fn { background: #f7f7f7; font-style: italic; }
+  .key.res { background: #222; color: #fff; width: 128px; }
+  .key.del { background: #e8e8e8; }
+  table { border-collapse: collapse; width: 100%; max-width: 380px; }
+  td { padding: 10px 0; vertical-align: top; }
+  td:first-child { width: 130px; padding-right: 10px; }
+  td label { font-size: 14px; }
+  td input { width: 100%; border: 1px solid #888; padding: 7px 9px; font-family: Georgia, serif; font-size: 14px; }
+  td input:focus { outline: 2px solid #333; }
+  .err { font-size: 12px; color: #a00; display: none; margin-top: 4px; }
+  .err.on { display: block; }
+  .form-actions { margin-top: 18px; }
+  .form-actions button { font-family: Georgia, serif; font-size: 14px; padding: 9px 24px; cursor: pointer; border: 1px solid #555; margin-right: 10px; background: #fff; }
+  .form-actions .go { background: #111; color: #fff; border-color: #111; }
+  .status { margin-top: 16px; font-size: 14px; padding: 10px 12px; display: none; border: 1px solid #aaa; }
+  .status.good { font-style: italic; }
+  .status.bad { color: #900; }
+  footer { border-top: 1px solid #ddd; text-align: center; padding: 16px; font-size: 12px; color: #aaa; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CSC426 - Software Development Practicum</h1>
+  <p>Adekunle Ajasin University, Akungba-Akoko</p>
+</header>
+<div class="wrap">
+
+  <section>
+    <h2>Practical 1 - GUI Calculator</h2>
+    <div class="sc" id="s">0</div>
+    <div class="keys">
+      <button class="key del" onclick="clr()">C</button>
+      <button class="key fn" onclick="op('%')">%</button>
+      <button class="key fn" onclick="op('^')">x^y</button>
+      <button class="key fn" onclick="op('/')">div</button>
+      <button class="key" onclick="num('7')">7</button>
+      <button class="key" onclick="num('8')">8</button>
+      <button class="key" onclick="num('9')">9</button>
+      <button class="key fn" onclick="op('*')">mul</button>
+      <button class="key" onclick="num('4')">4</button>
+      <button class="key" onclick="num('5')">5</button>
+      <button class="key" onclick="num('6')">6</button>
+      <button class="key fn" onclick="op('-')">sub</button>
+      <button class="key" onclick="num('1')">1</button>
+      <button class="key" onclick="num('2')">2</button>
+      <button class="key" onclick="num('3')">3</button>
+      <button class="key fn" onclick="op('+')">add</button>
+      <button class="key" onclick="num('0')">0</button>
+      <button class="key" onclick="num('.')">.</button>
+      <button class="key res" onclick="go()">=</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Practical 2 - Login Authentication</h2>
+    <table>
+      <tr>
+        <td><label for="un">Username</label></td>
+        <td>
+          <input type="text" id="un" autocomplete="off">
+          <div class="err" id="ue">Username cannot be empty.</div>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="pw">Password</label></td>
+        <td>
+          <input type="password" id="pw">
+          <div class="err" id="pe">Minimum 6 characters required.</div>
+        </td>
+      </tr>
+    </table>
+    <div class="form-actions">
+      <button class="go" onclick="sign()">Login</button>
+      <button onclick="rst()">Reset</button>
+    </div>
+    <div class="status" id="st"></div>
+  </section>
+
+</div>
+<footer>CSC426 Assignment | 2024/2025 Academic Session</footer>
+<script>
+  var ex = '', was = false;
+  function show(v) { document.getElementById('s').textContent = v || '0'; }
+  function num(n) {
+    if (was) { ex = ''; was = false; }
+    if (n === '.' && ex.split(/[+\-*/%^]/).pop().indexOf('.') > -1) return;
+    ex += n; show(ex);
+  }
+  function op(o) {
+    was = false;
+    if (!ex && o !== '-') return;
+    if (ex && '+-*/%^'.indexOf(ex[ex.length-1]) > -1) ex = ex.slice(0,-1);
+    ex += o; show(ex);
+  }
+  function clr() { ex = ''; was = false; show('0'); }
+  function go() {
+    if (!ex) return;
+    try {
+      var r = Function('"use strict";return(' + ex.replace(/\^/g,'**') + ')')();
+      if (!isFinite(r)) { show('Error'); ex=''; return; }
+      r = parseFloat(r.toFixed(10));
+      ex = String(r); show(ex); was = true;
+    } catch(e) { show('Error'); ex = ''; }
+  }
+
+  function sign() {
+    var u = document.getElementById('un').value.trim();
+    var p = document.getElementById('pw').value;
+    var ue = document.getElementById('ue');
+    var pe = document.getElementById('pe');
+    var st = document.getElementById('st');
+    ue.className = 'err'; pe.className = 'err'; st.style.display = 'none';
+    var ok = true;
+    if (!u) { ue.className = 'err on'; ok = false; }
+    if (p.length < 6) { pe.className = 'err on'; ok = false; }
+    if (!ok) return;
+    st.style.display = 'block';
+    if (u === 'admin' && p === 'admin123') {
+      st.className = 'status good';
+      st.textContent = 'Authentication successful. Welcome, ' + u + '.';
+    } else {
+      st.className = 'status bad';
+      st.textContent = 'Error: The credentials you entered do not match our records.';
+    }
+  }
+
+  function rst() {
+    document.getElementById('un').value = '';
+    document.getElementById('pw').value = '';
+    document.getElementById('ue').className = 'err';
+    document.getElementById('pe').className = 'err';
+    var st = document.getElementById('st');
+    st.style.display = 'none';
+    st.className = 'status';
+  }
+</script>
+</body>
+</html>
